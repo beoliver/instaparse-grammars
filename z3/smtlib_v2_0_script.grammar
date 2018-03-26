@@ -1,0 +1,116 @@
+script          = command*
+<lp>            = <'('>
+<rp>            = <')'>
+spec-constant   = numeral
+		| decimal
+		| hexadecimal
+		| binary
+		| string
+<reserved>      = 'NUMERAL'
+		| 'DECIMAL'
+		| 'STRING'
+		| '_'
+		| '!'
+		| 'as'
+		| 'let'
+		| 'forall'
+		| 'exists'
+<simple-symbol> = #'[a-zA-Z~!\$%\^\*-\+=<>\.\?/]+[a-zA-Z0-9~!\$%\^\*-\+=<>\.\?/]*'
+<quoted-symbol> = #'\|.*\|'
+symbol          = reserved
+		/ simple-symbol
+		/ quoted-symbol
+identifier      = symbol
+		| lp '_' symbol numeral+ rp
+qual-identifier = identifier
+		| lp 'as' identifier sort rp
+sort            = identifier
+		| lp identifier sort+ rp
+sorted-var      = lp symbol sort rp
+var-binding     = lp symbol term rp
+attribute       = keyword
+		| keyword attribute-value
+attribute-value = spec-constant
+		| symbol
+		| lp s-expr* rp
+s-expr          = spec-constant
+		| symbol
+		| keyword
+		| lp s-expr* rp
+term            = spec-constant
+		| qual-identifier
+		| lp qual-identifier term+ rp
+		| lp 'let' lp var-binding+ rp term rp
+		| lp 'forall' lp sorted-var+ rp term rp
+		| lp 'exists' lp sorted-var+ rp term rp
+		| lp '!' term attribute+ rp
+numeral         = '0' | #'[1-9]+[0-9]*'
+decimal         = #'(0 | [1-9]+[0-9]*)\.0*[1-9]+[0-9]*'
+hexadecimal     = #'#x[a-fA-F0-9]+'
+binary          = #'#b[0-1]+'
+string          = #'\".*\"'
+keyword         = #':[a-zA-Z0-9~!\$%\^\*\_\-\+=<>\.\?/]+'
+sort-dec        = lp symbol numeral rp
+selector-dec    = lp symbol sort rp
+constructor-dec = lp symbol selector-dec* rp
+datatype-dec    = lp constructor-dec+ rp
+	     	| lp 'par' lp symbol+ rp lp constructor-dec+ rp rp
+function-dec    = lp symbol lp sorted-var* rp sort rp
+function-def    = symbol lp sorted-var* rp sort term
+prop-literal    = symbol | lp 'not' symbol rp
+command         = lp 'assert' term rp
+		| lp 'check-sat' rp
+		| lp 'check-sat-assuming' lp prop-literal rp rp
+		| lp 'declare-const' symbol sort rp
+		| lp 'declare-datatype' symbol datatype-dec rp
+		| lp 'declare-datatypes' lp sort-dec+ rp lp datatype-dec+ rp rp
+  		| lp 'declare-fun' symbol lp sort* rp sort rp
+		| lp 'declare-sort' symbol numeral rp
+		| lp 'define-fun' function-def rp
+		| lp 'define-fun-rec' function-def rp
+		| lp 'define-funs-rec' lp function-dec+ rp lp term+ rp rp
+		| lp 'define-sort' symbol lp symbol* rp sort rp
+		| lp 'echo' string rp
+		| lp 'exit' rp
+		| lp 'get-assertions' rp
+		| lp 'get-assignment' rp
+		| lp 'get-info' info-flag rp
+		| lp 'get-model' rp
+		| lp 'get-model' rp
+		| lp 'get-option' keyword rp
+		| lp 'get-proof' rp
+		| lp 'get-unsat-assumptions' rp
+		| lp 'get-unsat-core' rp
+		| lp 'get-value' lp term+ rp rp
+		| lp 'pop' numeral rp
+		| lp 'push' numeral rp
+		| lp 'reset' rp
+		| lp 'reset-assertions' rp
+		| lp 'set-info' attribute rp
+		| lp 'set-logic' symbol rp
+		| lp 'set-option' option rp
+b-value 	= 'true'
+		| 'false'
+option  	= ':diagnostic-output-channel' string
+		| ':global-declarations' b-value
+		| ':interactive-mode' b-value
+		| ':print-success' b-value
+		| ':produce-assertions' b-value
+		| ':produce-assignments' b-value
+		| ':produce-models' b-value
+		| ':produce-proofs' b-value
+		| ':produce-unsat-assumptions' b-value
+		| ':produce-unsat-cores' b-value
+		| ':random-seed' numeral
+		| ':regular-output-channel' string
+		| ':reproducible-resource-limit' numeral
+		| ':verbosity' numeral
+		| attribute
+info-flag       = ':all-statistics'
+	  	| ':assertion-stack-levels'
+		| ':authors'
+	  	| ':error-behavior'
+	  	| ':name'
+	  	| ':reason-unknown'
+	  	| ':version'
+	  	| keyword
